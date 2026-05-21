@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Portal La Liga ⚽</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+body{
+    font-family: Arial;
+    text-align:center;
+    background: linear-gradient(to right,#ff512f,#dd2476);
+    color:white;
+}
+
+.sol{
+    position:relative;
+    width:400px;
+    height:400px;
+    margin:auto;
+}
+
+.planeta{
+    position:absolute;
+    padding:12px;
+    background:white;
+    color:black;
+    border-radius:50%;
+    cursor:pointer;
+}
+
+.planeta:nth-child(1){top:0;left:150px;}
+.planeta:nth-child(2){top:100px;left:300px;}
+.planeta:nth-child(3){top:250px;left:300px;}
+.planeta:nth-child(4){top:350px;left:150px;}
+.planeta:nth-child(5){top:150px;left:0;}
+
+.seccion{display:none;margin-top:30px;}
+
+table{margin:auto;border-collapse:collapse;}
+
+td{
+    border:1px solid white;
+    width:35px;
+    height:35px;
+    text-align:center;
+    cursor:pointer;
+}
+
+td.seleccionado{
+    background: yellow;
+    color:black;
+}
+
+input{
+    width:100%;
+    height:100%;
+    text-align:center;
+    border:none;
+    font-size:18px;
+}
+
+#zona{
+    margin-top:20px;
+    border:2px dashed white;
+    padding:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚽ Juegos Interactivos - La Liga</h1>
+
+<div class="sol">
+<div class="planeta" onclick="mostrar('sopa')">Sopa</div>
+<div class="planeta" onclick="mostrar('crucigrama')">Crucigrama</div>
+<div class="planeta" onclick="mostrar('quiz')">Quiz</div>
+<div class="planeta" onclick="mostrar('juego')">Juego</div>
+<div class="planeta" onclick="mostrar('puzzle')">Puzzle</div>
+</div>
+
+<!-- SOPA DE LETRAS -->
+<div id="sopa" class="seccion">
+<h2>Sopa de Letras</h2>
+
+<table id="grid"></table>
+
+<h3>🧩 Palabras:</h3>
+<p>REAL, BARCA, GOL</p>
+
+</div>
+
+<!-- CRUCIGRAMA -->
+<div id="crucigrama" class="seccion">
+<h2>Crucigrama ⚽</h2>
+
+<table>
+<tr>
+  <td><input maxlength="1" id="c0"></td>
+  <td><input maxlength="1" id="c1"></td>
+  <td><input maxlength="1" id="c2"></td>
+  <td><input maxlength="1" id="c3"></td>
+  <td><input maxlength="1" id="c4"></td>
+  <td><input maxlength="1" id="c5"></td>
+  <td><input maxlength="1" id="c6"></td>
+</tr>
+<tr>
+  <td></td><td></td>
+  <td><input maxlength="1" id="c7"></td>
+</tr>
+<tr>
+  <td><input maxlength="1" id="c8"></td>
+  <td><input maxlength="1" id="c9"></td>
+  <td><input maxlength="1" id="c10"></td>
+</tr>
+</table>
+
+<p>Palabras: BENZEMA, RONALDO</p>
+
+<button onclick="verificarCrucigrama()">Verificar</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="seccion">
+<h2>Quiz</h2>
+<p>¿Quién tiene más títulos?</p>
+<button onclick="res('real')">Real Madrid</button>
+<button onclick="res('barca')">Barcelona</button>
+</div>
+
+<!-- JUEGO -->
+<div id="juego" class="seccion">
+<h2>Juego Retro</h2>
+<canvas id="c" width="400" height="300"></canvas>
+</div>
+
+<!-- PUZZLE -->
+<div id="puzzle" class="seccion">
+<h2>Rompecabezas</h2>
+
+<div id="piezas">
+  <div draggable="true" id="p1">⚽</div>
+  <div draggable="true" id="p2">🏆</div>
+</div>
+
+<div id="zona">Suelta aquí</div>
+</div>
+
+<script>
+
+/* INICIO */
+Swal.fire("Bienvenido","Disfruta los juegos ⚽","info");
+
+function mostrar(id){
+    document.querySelectorAll(".seccion").forEach(s=>s.style.display="none");
+    document.getElementById(id).style.display="block";
+}
+
+/* SOPA DE LETRAS */
+let palabras = ["REAL","BARCA","GOL"];
+let tamaño = 10;
+let grid = document.getElementById("grid");
+
+// matriz vacía
+let matriz = Array.from({length:tamaño},()=>Array(tamaño).fill(""));
+
+// colocar palabras horizontales simples
+matriz[0].splice(0,4,..."REAL");
+matriz[2].splice(2,5,..."BARCA");
+matriz[5].splice(5,3,..."GOL");
+
+// rellenar resto
+for(let i=0;i<tamaño;i++){
+  for(let j=0;j<tamaño;j++){
+    if(matriz[i][j]==""){
+      matriz[i][j] = String.fromCharCode(65+Math.random()*26);
+    }
+  }
+}
+
+// pintar tabla
+for(let i=0;i<tamaño;i++){
+  let fila="<tr>";
+  for(let j=0;j<tamaño;j++){
+    fila+=`<td>${matriz[i][j]}</td>`;
+  }
+  fila+="</tr>";
+  grid.innerHTML+=fila;
+}
+
+// selección con mouse
+let seleccionando=false;
+
+document.querySelectorAll("#grid td").forEach(td=>{
+  td.addEventListener("mousedown",()=>{
+    seleccionando=true;
+    td.classList.add("seleccionado");
+  });
+
+  td.addEventListener("mouseover",()=>{
+    if(seleccionando){
+      td.classList.add("seleccionado");
+    }
+  });
+
+  td.addEventListener("mouseup",()=>{
+    seleccionando=false;
+  });
+});
+
+/* CRUCIGRAMA */
+function verificarCrucigrama(){
+
+    let palabra1 = 
+        (c0.value + c1.value + c2.value + c3.value + c4.value + c5.value + c6.value)
+        .toLowerCase();
+
+    let palabra2 =
+        (c2.value + c7.value + c10.value).toLowerCase();
+
+    if(palabra1 === "benzema" && palabra2 === "ron"){
+        Swal.fire("¡Correcto!","Crucigrama completado","success");
+    } else {
+        Swal.fire("Error","Sigue intentando","error");
+    }
+}
+
+/* QUIZ */
+function res(op){
+    if(op=="real"){
+        Swal.fire("Correcto","","success");
+    }else{
+        Swal.fire("Error","","error");
+    }
+}
+
+/* JUEGO */
+let c=document.getElementById("c");
+let ctx=c.getContext("2d");
+
+let x=50, y=150;
+let enemigoX=300, enemigoY=150;
+
+document.addEventListener("keydown",e=>{
+    if(e.key=="ArrowRight") x+=10;
+    if(e.key=="ArrowLeft") x-=10;
+    if(e.key=="ArrowUp") y-=10;
+    if(e.key=="ArrowDown") y+=10;
+});
+
+function draw(){
+    ctx.clearRect(0,0,400,300);
+
+    ctx.fillStyle="white";
+    ctx.fillRect(x,y,20,20);
+
+    ctx.fillStyle="red";
+    ctx.fillRect(enemigoX,enemigoY,20,20);
+
+    if(x < enemigoX+20 &&
+       x+20 > enemigoX &&
+       y < enemigoY+20 &&
+       y+20 > enemigoY){
+
+        Swal.fire("¡Ganaste!","","success");
+        enemigoX = Math.random()*350;
+        enemigoY = Math.random()*250;
+    }
+
+    requestAnimationFrame(draw);
+}
+draw();
+
+/* PUZZLE */
+let piezaActual = "";
+
+document.querySelectorAll("#piezas div").forEach(p=>{
+    p.addEventListener("dragstart",()=>{
+        piezaActual = p.id;
+    });
+});
+
+let zona = document.getElementById("zona");
+
+zona.addEventListener("dragover", e => e.preventDefault());
+
+zona.addEventListener("drop", ()=>{
+    if(piezaActual){
+        let pieza = document.getElementById(piezaActual);
+        zona.appendChild(pieza);
+
+        if(zona.children.length === 2){
+            Swal.fire("¡Completado!","Puzzle terminado","success");
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
